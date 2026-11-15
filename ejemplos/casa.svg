@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ejemplo de dibujo en relieve para BrailleGL / BrailleRAP.
+
+  Como se interpreta:
+  - 1 unidad = 1 mm en la hoja. La hoja por defecto mide 175 x 290 mm.
+  - Solo cuentan los TRAZOS (stroke). El relleno se ignora.
+  - Cada trazo se convierte en puntos en relieve separados por "Paso del
+    trazo" (svgStep, 2 mm por defecto) en el panel tecnico > Imagen SVG.
+  - Se usan solo <path>: son los que el importador recorre de forma fiable.
+
+  El dibujo empieza en y = 80 mm para dejar libres las primeras lineas de
+  texto braille (cada linea ocupa 9,9 mm). Escribe por ejemplo "Casa" en el
+  cuadro de texto y luego importa este archivo desde "Imagen SVG".
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="175" height="290">
+  <g fill="none" stroke="#000" stroke-width="1" stroke-linejoin="round">
+
+    <!-- sol: circulo de 12 mm de radio -->
+    <path d="M 138 95 A 12 12 0 1 1 162 95 A 12 12 0 1 1 138 95 Z" />
+
+    <!-- techo -->
+    <path d="M 40 150 L 87.5 110 L 135 150" />
+
+    <!-- paredes -->
+    <path d="M 45 150 L 45 215 L 130 215 L 130 150 Z" />
+
+    <!-- puerta -->
+    <path d="M 78 215 L 78 185 L 97 185 L 97 215" />
+
+    <!-- ventana -->
+    <path d="M 55 160 L 70 160 L 70 175 L 55 175 Z" />
+
+    <!-- suelo -->
+    <path d="M 15 225 L 160 225" />
+
+  </g>
+</svg>

@@ -1,0 +1,9 @@
+{
+  "name": "braillegl",
+  "private": true,
+  "description": "BrailleRap con corte por palabra, tabla espanola e interfaz traducida. Sin dependencias ni paso de build.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/test-layout.js"
+  }
+}

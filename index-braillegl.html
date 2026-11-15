@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>BrailleGL</title>
+	<link rel="stylesheet" href="braillegl.css" />
+
+	<script src="jquery-3.1.1.min.js"></script>
+	<script src="paper-full.min.js"></script>
+	<script src="dat.gui.min.js"></script>
+
+	<script>var languages = {}</script>
+	<script src="braille-es.js"></script>
+	<script src="braille6.js"></script>
+	<script src="braille6india.js"></script>
+	<script src="braille8old.js"></script>
+	<script src="braille8new.js"></script>
+	<script src="devnagrinumbers.js"></script>
+
+	<script src="braillegl-i18n.js"></script>
+	<script src="braillegl-layout.js"></script>
+	<script src="script-braillegl.js"></script>
+</head>
+
+<body>
+
+	<header class="app">
+		<h1>BrailleGL</h1>
+		<p class="tagline" id="t-tagline"></p>
+		<nav>
+			<span class="lang-switch">
+				<label for="ui-lang" id="t-uiLang"></label>
+				<select id="ui-lang"></select>
+			</span>
+			<a href="https://github.com/crocsg/BrailleRap/blob/master/Documentation/documentation-fr.md" id="t-docs"></a>
+			<a href="https://github.com/crocsg/BrailleRap" id="t-repo"></a>
+		</nav>
+	</header>
+
+	<main>
+
+		<section class="card" aria-labelledby="h-text">
+			<h2 id="h-text" class="sr-only">Texto</h2>
+
+			<label for="latin" id="t-textLabel"></label>
+			<textarea id="latin" rows="8" spellcheck="false"></textarea>
+
+			<div class="row">
+				<label for="braille-table" id="t-brailleTable"></label>
+				<select id="braille-table"></select>
+				<p class="hint" id="t-brailleTableHelp"></p>
+			</div>
+
+			<div class="row inline">
+				<input type="checkbox" id="word-wrap" checked />
+				<label for="word-wrap" id="t-wordWrap"></label>
+			</div>
+			<p class="hint" id="t-wordWrapHelp"></p>
+
+			<div class="row">
+				<label for="paper-preset" id="t-paperPreset"></label>
+				<select id="paper-preset"></select>
+			</div>
+
+			<div class="row">
+				<button type="button" id="download-gcode"></button>
+				<p class="hint" id="t-downloadHint"></p>
+			</div>
+
+			<div id="status" role="status" aria-live="polite"></div>
+
+			<div id="gui"></div>
+		</section>
+
+		<section class="card" aria-labelledby="h-preview">
+			<h2 id="h-preview"></h2>
+			<canvas id="paperCanvas" resize hdpi></canvas>
+			<div class="pager">
+				<button type="button" class="ghost" id="page-prev" aria-label="">&#8249;</button>
+				<span class="count" id="page-count"></span>
+				<button type="button" class="ghost" id="page-next" aria-label="">&#8250;</button>
+			</div>
+		</section>
+
+	</main>
+
+	<details class="tech">
+		<summary id="t-advanced"></summary>
+		<div class="grid">
+			<div>
+				<label for="optimizedgcode" id="t-optimizedGcode"></label>
+				<textarea id="optimizedgcode" readonly></textarea>
+			</div>
+			<div>
+				<label for="dotposition" id="t-dotPositions"></label>
+				<textarea id="dotposition" readonly></textarea>
+			</div>
+		</div>
+		<div>
+			<label for="gcode" id="t-gcodeRaw"></label>
+			<textarea id="gcode" readonly></textarea>
+		</div>
+	</details>
+
+</body>
+</html>
