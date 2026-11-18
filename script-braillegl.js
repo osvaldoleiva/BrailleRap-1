@@ -55,6 +55,7 @@ $(document).ready(function () {
 		GCODEdown: 'M3 S1',
 		usedotgrid: false,
 		// nuevos
+		oneDirection: true,
 		wordWrap: true,
 		page: 0
 	};
@@ -125,34 +126,37 @@ $(document).ready(function () {
 		return gcodeprintdot();
 	};
 
-	// orden en zigzag por linea, para que el cabezal no vuelva en vacio
-	let gcodesortzigzag = function (positions) {
-		let i;
-		let s = 0;
-		let e = 0;
-		let dir = 1;
-		let tmp = [];
-		let sorted = [];
+	// Grabado unidireccional (braille.oneDirection): filas de arriba hacia
+	// abajo (Y creciente) y, dentro de cada fila, siempre de X mayor a X
+	// menor. El cabezal vuelve en vacio al inicio de cada fila, pero todos
+	// los puntos se marcan desde el mismo lado (evita el juego mecanico).
+	let sortOneDirection = function (a, b) {
+		if (a.y == b.y) { return b.x - a.x; }
+		return a.y - b.y;
+	};
 
-		if (positions == null) { return sorted; }
+	let sortAscending = function (a, b) {
+		if (a.y == b.y) { return a.x - b.x; }
+		return a.y - b.y;
+	};
 
-		while (e < positions.length) {
-			while (positions[s].y == positions[e].y) {
-				e++;
-				if (e == positions.length) { break; }
+	// Orden en zigzag por linea (comportamiento original): la primera fila
+	// va de X menor a X mayor y cada fila siguiente invierte el sentido.
+	let sortZigzag = function (positions) {
+		let sorted = positions.slice().sort(sortAscending);
+		let result = [];
+		let row = [];
+		let reverse = false;
+		for (let i = 0; i <= sorted.length; i++) {
+			if (i == sorted.length || (row.length > 0 && sorted[i].y != row[0].y)) {
+				if (reverse) { row.reverse(); }
+				result = result.concat(row);
+				row = [];
+				reverse = !reverse;
 			}
-			for (i = s; i < e; i++) { tmp.push(positions[i]); }
-			tmp.sort(function (a, b) {
-				if (a.y == b.y) { return (a.x - b.x) * dir; }
-				return a.y - b.y;
-			});
-			for (i = 0; i < tmp.length; i++) { sorted.push(tmp[i]); }
-			tmp = [];
-			dir = -dir;
-			s = e;
-			if (e >= positions.length) { break; }
+			if (i < sorted.length) { row.push(sorted[i]); }
 		}
-		return sorted;
+		return result;
 	};
 
 	let buildoptimizedgcode = function () {
@@ -170,12 +174,9 @@ $(document).ready(function () {
 		codestr += gcodeSetSpeed(braille.speed);
 		if (braille.goToZero) { codestr += gcodeMoveTo(0, 0, 0); }
 
-		GCODEdotposition.sort(function (a, b) {
-			if (a.y == b.y) { return a.x - b.x; }
-			return a.y - b.y;
-		});
-
-		let sortedpositions = gcodesortzigzag(GCODEdotposition);
+		let sortedpositions = braille.oneDirection
+			? GCODEdotposition.slice().sort(sortOneDirection)
+			: sortZigzag(GCODEdotposition);
 
 		for (i = 0; i < sortedpositions.length; i++) {
 			codestr += gcodeMoveTo(sortedpositions[i].x, sortedpositions[i].y);
@@ -262,10 +263,7 @@ $(document).ready(function () {
 	let svgToGCode = function (svgItem, gcodeObj) {
 		plotItem(svgItem, gcodeObj);
 		if (GCODEsvgdotposition != null && GCODEsvgdotposition.length > 0) {
-			GCODEsvgdotposition.sort(function (a, b) {
-				if (a.y == b.y) { return a.x - b.x; }
-				return a.y - b.y;
-			});
+			GCODEsvgdotposition.sort(braille.oneDirection ? sortOneDirection : sortAscending);
 		}
 	};
 
@@ -548,6 +546,7 @@ $(document).ready(function () {
 		add('mirrorX', null, null, printerFolder, 'mirrorX');
 		add('mirrorY', null, null, printerFolder, 'mirrorY');
 		add('goToZero', null, null, printerFolder, 'goToZero');
+		add('oneDirection', null, null, printerFolder, 'oneDirection');
 		add('GCODEup', null, null, printerFolder, 'gcodeUp');
 		add('GCODEdown', null, null, printerFolder, 'gcodeDown');
 
