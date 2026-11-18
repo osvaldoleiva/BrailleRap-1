@@ -54,6 +54,7 @@ var BrailleGLI18N = (function () {
 			mirrorY: 'Espejar Y',
 			goToZero: 'Ir a cero',
 			oneDirection: 'Grabar en un solo sentido',
+			yFirst: 'Cambio de renglón: Y y luego X',
 			gcodeUp: 'G-code subir',
 			gcodeDown: 'G-code bajar',
 
@@ -125,6 +126,7 @@ var BrailleGLI18N = (function () {
 			mirrorY: 'Mirror Y',
 			goToZero: 'Go to zero',
 			oneDirection: 'Emboss in one direction',
+			yFirst: 'Line change: Y then X',
 			gcodeUp: 'G-code up',
 			gcodeDown: 'G-code down',
 
@@ -196,6 +198,7 @@ var BrailleGLI18N = (function () {
 			mirrorY: 'Miroir Y',
 			goToZero: 'Aller à zéro',
 			oneDirection: 'Graver dans un seul sens',
+			yFirst: 'Changement de ligne : Y puis X',
 			gcodeUp: 'G-code haut',
 			gcodeDown: 'G-code bas',
 

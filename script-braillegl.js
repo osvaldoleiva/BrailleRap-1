@@ -56,6 +56,7 @@ $(document).ready(function () {
 		usedotgrid: false,
 		// nuevos
 		oneDirection: true,
+		yFirst: true,
 		wordWrap: true,
 		page: 0
 	};
@@ -174,12 +175,29 @@ $(document).ready(function () {
 		codestr += gcodeSetSpeed(braille.speed);
 		if (braille.goToZero) { codestr += gcodeMoveTo(0, 0, 0); }
 
+		// Cambio de renglon (braille.yFirst): cuando la Y cambia, mover
+		// primero solo en Y y luego solo en X, para que el carro no pase en
+		// diagonal por encima de los puntos ya hechos.
+		//   G1 Y12.30;
+		//   G1 X157.50;
+		let lastY = null;
+		let moveToDot = function (x, y) {
+			let code;
+			if (braille.yFirst && y !== lastY) {
+				code = gcodeMoveTo(null, y) + gcodeMoveTo(x, null);
+			} else {
+				code = gcodeMoveTo(x, y);
+			}
+			lastY = y;
+			return code;
+		};
+
 		let sortedpositions = braille.oneDirection
 			? GCODEdotposition.slice().sort(sortOneDirection)
 			: sortZigzag(GCODEdotposition);
 
 		for (i = 0; i < sortedpositions.length; i++) {
-			codestr += gcodeMoveTo(sortedpositions[i].x, sortedpositions[i].y);
+			codestr += moveToDot(sortedpositions[i].x, sortedpositions[i].y);
 			codestr += gcodeprintdot();
 			// La grilla solo sirve para filtrar el SVG. El original fallaba
 			// aqui con coordenadas negativas (invertX sin mirrorX).
@@ -198,12 +216,12 @@ $(document).ready(function () {
 
 			if (braille.usedotgrid === true) {
 				if (dotgrid[gx][gy] === 0) {
-					codestr += gcodeMoveTo(GCODEsvgdotposition[i].x, GCODEsvgdotposition[i].y);
+					codestr += moveToDot(GCODEsvgdotposition[i].x, GCODEsvgdotposition[i].y);
 					codestr += gcodeprintdot();
 					dotgrid[gx][gy] = 1;
 				}
 			} else {
-				codestr += gcodeMoveTo(GCODEsvgdotposition[i].x, GCODEsvgdotposition[i].y);
+				codestr += moveToDot(GCODEsvgdotposition[i].x, GCODEsvgdotposition[i].y);
 				codestr += gcodeprintdot();
 			}
 		}
@@ -547,6 +565,7 @@ $(document).ready(function () {
 		add('mirrorY', null, null, printerFolder, 'mirrorY');
 		add('goToZero', null, null, printerFolder, 'goToZero');
 		add('oneDirection', null, null, printerFolder, 'oneDirection');
+		add('yFirst', null, null, printerFolder, 'yFirst');
 		add('GCODEup', null, null, printerFolder, 'gcodeUp');
 		add('GCODEdown', null, null, printerFolder, 'gcodeDown');
 
