@@ -37,6 +37,63 @@ languages['Espanol (6 puntos)'] = {
 	// [B2] signo de mayuscula: puntos 4-6, se antepone a la letra
 	capitalPrefix: [4, 6],
 
+	// Palabras enteras en mayusculas (solo modo literatura):
+	//   'palabra'     [B2 7.1] dos signos de mayuscula antes de la primera
+	//                 letra: ONCE -> 46-46 o n c e
+	//   'tipografico' [B2 7.2] en minusculas entre dos signos de escritura
+	//                 especial (puntos 3-5): NORMAS -> 35 n o r m a s 35
+	capsMode: 'palabra',
+	typographicSign: [3, 5],
+
+	// -----------------------------------------------------------------
+	// Modo matematicas. Fuente: Codigo Matematico Unificado para
+	// Iberoamerica (CMU), Consejo Iberoamericano del Braille, 2.a edicion,
+	// abril de 2024. Se cita el apartado de cada valor.
+	// -----------------------------------------------------------------
+	math: {
+		// [CMU 1.1] prefijo de latina minuscula, ante a-j en expresiones
+		// numericas: 3b -> 3456-14 5-12
+		letterPrefix: [5],
+
+		// [CMU 2.3] separador decimal, aunque en tinta sea punto o apostrofo
+		decimalSeparator: [2],
+
+		// [CMU 4.2.1, 5.2.1] superindice a la derecha (exponente)
+		superscriptPrefix: [1, 6],
+
+		// [CMU 3.1] parentesis auxiliares (sin signo en tinta)
+		auxOpen: [2, 6],
+		auxClose: [3, 5],
+
+		// [CMU 5.1] multiplicar con punto: 6-0d. "0d" = la celda siguiente
+		// no puede tener los puntos 1, 2 ni 3; si los tiene, el motor deja
+		// un cajetin en blanco. Caracteres de entrada [MAP]: punto medio y
+		// operador punto de Unicode.
+		multiplyDot: [6],
+		multiplyDotChars: ['·', '⋅'],
+
+		// Signos que en matematicas reemplazan o completan la tabla
+		signs: {
+			"+": [2, 3, 5],                    // [CMU 5.1] sumar
+			"-": [3, 6],                       // [CMU 5.1] restar
+			"−": [3, 6],                  // [CMU 5.1] restar (signo menos tipografico)
+			"=": [2, 3, 5, 6],                 // [CMU 5.1, 6.1] igual a
+			"×": [2, 3, 6],               // [CMU 5.1] multiplicar (aspa)
+			"/": [2, 5, 6],                    // [CMU 5.1] division con barra inclinada
+			":": [[5], [2]],                   // [CMU 5.1] division con dos puntos
+			"÷": [[5], [2]],              // [CMU 5.1] division (signo de dividir)
+			"<": [2, 4, 6],                    // [CMU 6.1] menor que
+			">": [1, 3, 5],                    // [CMU 6.1] mayor que
+			"≤": [[2, 4, 6], [2, 3, 5, 6]], // [CMU 6.1] menor o igual que
+			"≥": [[1, 3, 5], [2, 3, 5, 6]], // [CMU 6.1] mayor o igual que
+			"≠": [[4, 5], [2, 3, 5, 6]],    // [CMU 6.2] distinto de
+			"≈": [[5], [2, 3, 5, 6], [3]],  // [CMU 6.1] casi igual a
+			"≐": [[4], [2, 3, 5, 6]],       // [CMU 6.1] aproximadamente igual a
+			"≔": [[5, 6], [2, 3, 5, 6]],    // [CMU 6.1] igual por definicion
+			"≡": [[2, 3, 5, 6], [2, 3, 5, 6]] // [CMU 6.1] identico a
+		}
+	},
+
 	latinToBraille: {
 
 		// --- Alfabeto [B2] ---
@@ -107,6 +164,10 @@ languages['Espanol (6 puntos)'] = {
 		"*": [3, 5],
 		"'": [3],
 		" ": [],
+
+		// --- Signos matematicos ---
+		// Igual a: puntos 2-3-5-6. CMU 2.a ed. 2024, apartados 5.1 y 6.1.
+		"=": [2, 3, 5, 6],
 
 		// --- Signos de dos celdas [B2] ---
 		// La barra se escribe punto 6 seguido de punto 2.

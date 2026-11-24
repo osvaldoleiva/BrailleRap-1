@@ -58,6 +58,7 @@ $(document).ready(function () {
 		oneDirection: true,
 		yFirst: true,
 		wordWrap: true,
+		mode: 'literatura',      // 'literatura' | 'matematicas'
 		page: 0
 	};
 
@@ -373,7 +374,8 @@ $(document).ready(function () {
 				? compairCharAgaistDevnagriNumber : null,
 			specialPrefixOf: typeof getPrefixforSpecialcharacter === 'function'
 				? getPrefixforSpecialcharacter : null,
-			useCapitalPrefix: !eightDot
+			useCapitalPrefix: !eightDot,
+			mode: braille.mode
 		});
 
 		// --- 2. celdas a posiciones, respetando las palabras ---
@@ -624,6 +626,22 @@ $(document).ready(function () {
 		$sel.val(braille.language);
 	}
 
+	// El modo de transcripcion solo existe en tablas con bloque `math`
+	// (hoy, la espanola). Con las demas queda fijo en literatura.
+	function fillModeSelect() {
+		let $sel = $('#transcription-mode').empty();
+		$('<option>').val('literatura').text(T.t('modeLiterature')).appendTo($sel);
+		$('<option>').val('matematicas').text(T.t('modeMath')).appendTo($sel);
+		syncModeSelect();
+	}
+
+	function syncModeSelect() {
+		let hasMath = currentLanguage().math != null;
+		$('#transcription-mode')
+			.prop('disabled', !hasMath)
+			.val(hasMath ? braille.mode : 'literatura');
+	}
+
 	function fillPaperPresetSelect() {
 		let $sel = $('#paper-preset').empty();
 		T.paperPresets.forEach(function (p) {
@@ -654,6 +672,8 @@ $(document).ready(function () {
 			'#t-textLabel': 'textLabel',
 			'#t-brailleTable': 'brailleTable',
 			'#t-brailleTableHelp': 'brailleTableHelp',
+			'#t-transcriptionMode': 'transcriptionMode',
+			'#t-transcriptionModeHelp': 'transcriptionModeHelp',
 			'#t-wordWrap': 'wordWrap',
 			'#t-wordWrapHelp': 'wordWrapHelp',
 			'#t-paperPreset': 'paperPreset',
@@ -673,6 +693,7 @@ $(document).ready(function () {
 		$('#download-gcode').text(T.t('download'));
 
 		fillBrailleTableSelect();
+		fillModeSelect();
 		fillPaperPresetSelect();
 		buildGUI();
 	}
@@ -693,6 +714,14 @@ $(document).ready(function () {
 		braille.language = $(this).val();
 		braille.page = 0;
 		initLanguage();
+		syncModeSelect();
+		brailleToGCode();
+	});
+
+	// modo de transcripcion
+	$('#transcription-mode').on('change', function () {
+		braille.mode = $(this).val();
+		braille.page = 0;
 		brailleToGCode();
 	});
 

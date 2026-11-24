@@ -119,6 +119,72 @@ Reglas implementadas en el motor:
 - Accesibilidad: un `label` por control, foco visible y `aria-label` en los
   botones de página.
 
+## 4. Mayúsculas y modos de transcripción
+
+Selector nuevo **Modo de transcripción** junto al de tabla braille, con dos
+valores. Es independiente de la tabla y del idioma de la interfaz. Solo existe
+para tablas con bloque `math` (hoy, la española); con las demás queda
+deshabilitado y fijo en literatura. Entra al motor como
+`textToTokens(text, lang, { mode: 'literatura' | 'matematicas' })`.
+
+### Literatura (por defecto)
+
+Fuente: documento técnico **B 2** de la ONCE.
+
+- `=` → 2356 (también en literatura; el valor es el del CMU 5.1 y 6.1).
+- **Palabras enteras en mayúsculas.** Un análisis previo (`analyzeCaps`) recorre
+  el texto por palabras antes de traducirlo. Una palabra está «entera en
+  mayúsculas» si tiene dos o más mayúsculas y ninguna minúscula; las cifras y la
+  puntuación no la rompen (`EE.UU.`, `«ONCE»` entran; `A`, `iPhone` no). El
+  criterio es el metadato `capsMode` de la tabla (o el hook del mismo nombre):
+
+  | `capsMode` | Regla | Ejemplo |
+  |---|---|---|
+  | `palabra` (por defecto) | B 2, 7.1: dos signos 46 antes de la primera letra | `ONCE` → 46-46 o n c e; `«ONCE»` → 236 46 46 o n c e 236 |
+  | `tipografico` | B 2, 7.2: en minúsculas entre dos signos 35 (`typographicSign`); palabras seguidas forman un grupo | `estas NORMAS es` → estas 35 normas 35 es |
+
+  Un salto de línea corta el grupo. Las tablas sin `capsMode` (francesa, india)
+  y las de 8 puntos siguen como antes.
+
+### Matemáticas
+
+Fuente: **Código Matemático Unificado para Iberoamérica**, Consejo
+Iberoamericano del Braille, 2.ª edición, abril de 2024. Los valores están en el
+bloque `math` de `braille-es.js`, con su apartado.
+
+| Qué | Puntos | CMU |
+|---|---|---|
+| Mayúscula: prefijo 46 en cada letra, sin agrupar (`ABC` → 46-1 46-12 46-14) | 46 | 1.1 |
+| Prefijo de latina minúscula ante a–j dentro de una expresión numérica (`3b` → 3456-14 5-12; `1+2i`; `234a5` → `#bcd@ae`) | 5 | 1.1, 2.5 |
+| Separador decimal con apóstrofo en tinta (`3’2` → `#c,b`) | 2 | 2.3 |
+| `+` sumar · `-` y `−` restar · `=` igual | 235 · 36 · 2356 | 5.1 |
+| `×` multiplicar (aspa) | 236 | 5.1 |
+| `·` multiplicar (punto): si la celda siguiente tiene algún punto 1, 2 o 3 se deja un cajetín en blanco (`6·2` → `#f_ #b`) | 6-0d | 5.1 y notación |
+| `/` división con barra inclinada | 256 | 5.1 |
+| `:` y `÷` división con dos puntos | 5-2 | 5.1 |
+| `<` · `>` | 246 · 135 | 6.1 |
+| `≤` · `≥` | 246-2356 · 135-2356 | 6.1 |
+| `≈` · `≐` · `≔` · `≡` | 5-2356-3 · 4-2356 · 56-2356 · 2356-2356 | 6.1 |
+| `≠` | 45-2356 | 6.2 |
+| Exponente con superíndices Unicode (`x²` → `x1#b`, `x⁻¹` → `x1-#a`) | 16 | 4.2.1, 5.2.1 |
+| Exponente de varios términos entre paréntesis auxiliares (`xⁿ⁺¹` → `x1?n+#a}`) | 26 … 35 | 3.1, 4.2.1 |
+
+Dentro de una expresión numérica las letras no cierran el número: las cifras
+siguientes no repiten el signo de número (CMU 1.1, `234a5`). Un exponente se
+considera de varios términos cuando tiene `+`, `-` o `=` fuera de paréntesis y
+no en la primera posición, para que `x⁻¹` y `x⁻⁽ⁿ⁺¹⁾` queden como los ejemplos
+del 5.2.1, sin auxiliares.
+
+Pendiente de decisión (no implementado):
+
+- Punto en tinta entre cifras en modo matemáticas: hoy se transcribe como
+  aparece (punto 3), así que `3.2` sale `#c.b` y no `#c,b` como en el CMU 2.3.
+  El CMU decide por el significado y no da regla para texto plano.
+- Espacio como separador de millares (`3 802 197`, `-25 347`): hoy el espacio
+  separa números.
+- Fracciones (`¾`, CMU 2.4).
+- Texto y fórmulas mezclados en un mismo documento (CMU 14.1).
+
 ## Correcciones respecto del original
 
 - **Tamaño impreso.** Los `bounds` del grupo de texto ya están en mm, porque la
@@ -143,12 +209,12 @@ dónde.
 npm test                        # o: node tests/test-layout.js
 ```
 
-Son 40 casos y no necesitan dependencias: 28 celdas por línea, palabra que baja
+Son 85 casos y no necesitan dependencias: 28 celdas por línea, palabra que baja
 entera (medida con sus prefijos), palabra más larga que la línea, comparación
 con y sin `wordWrap`, signo de número (`1234`, `1.000`, `3,5`, `12 34`),
 `Ñandú` y `Árbol`, barra de dos celdas, no soportados, paginación sin pérdida,
 saltos y líneas en blanco, espacios dobles y sangría, tabla francesa, tablas de
-8 puntos y devanagari.
+8 puntos y devanagari, signo igual, mayúsculas agrupadas (palabra y tipográfico) y modo matemáticas con los ejemplos del CMU.
 
 `tests/e2e-chrome.js` abre la página en Chrome headless (35 casos). Necesita
 `puppeteer-core` instalado **fuera** del repo; las instrucciones están en la
@@ -158,11 +224,11 @@ interfaz y de tabla, paginación y descarga, golpes en el G-code (`ñu` = 8,
 
 ## Pendientes conocidos
 
-- Falta el **signo de letra** (puntos 5-6) que el español exige cuando una letra
-  de la `a` a la `j` sigue inmediatamente a una cifra. Hoy `3a` se lee como
-  `31`.
-- La mayúscula se marca letra por letra. Falta el **signo de palabra completa
-  en mayúsculas**.
+- En **modo literatura**, una letra de la `a` a la `j` justo después de una
+  cifra sigue sin prefijo: `3a` se lee como `31`. En modo matemáticas ya lleva
+  el **prefijo de latina minúscula, punto 5** (CMU 1.1); los puntos 5-6 que
+  decía esta nota son el prefijo de variante tipográfica (CMU 2.5 c), no el de
+  minúscula. La regla del B 2 para literatura falta verificarla.
 - Las **dimensiones de celda** siguen siendo las del original. Ajustarlas al
   Documento técnico B 1 (parámetros dimensionales) requiere medir contra la
   máquina.
